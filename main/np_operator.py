@@ -1,6 +1,5 @@
 import concurrent.futures
 import logging
-
 import kopf
 from kubernetes import client
 from config import Config
@@ -95,48 +94,6 @@ def validate_namespace(body, **_):
     if ns_annotations and NS_ANNOTATION in ns_annotations:
         raise kopf.AdmissionError(f'Namespace: {body.metadata.name} is protected and cannot be deleted.')
 
-
-# @kopf.on.validate(CRD_NAME,operations=['CREATE','UPDATE'])
-# def validate_np_params(body, **_):
-#     if body.spec.get('namespaces') and body.spec.get('selectors'):
-#         raise kopf.PermanentError('Only one of spec.namespaces and spec.selectors can be configured')
-#     if not body.spec.get('namespace'):
-#         raise kopf.PermanentError('spec.namespace is required')
-#
-# @kopf.on.update(CRD_NAME)
-# @kopf.on.create(CRD_NAME)
-# @kopf.on.resume(CRD_NAME)
-# def ns_protect_fn(spec,logger, **_):
-#     ns = spec.get('namespace')
-#     ns_annotations = api.read_namespace(ns).metadata.annotations
-#     if  ns_annotations:
-#         if NS_ANNOTATION in ns_annotations:
-#             logger.info(f'namespace is protected: {ns}')
-#             return {'message': f'namespace: {ns} is protected'}
-#
-#     patch_body = {
-#         'metadata': {
-#             'annotations': {NS_ANNOTATION: 'true'},
-#         }
-#     }
-#     api.patch_namespace(ns,patch_body)
-#     return {'message': f'namespace: {ns} is protected'}
-#
-# @kopf.on.update(CRD_NAME,field='spec.namespace')
-# def update_ns_fn(new, old, **_):
-#     all_ns = (ns.metadata.name for ns in api.list_namespace().items)
-#     if old not in all_ns:
-#         return {'message': f'namespace: {old} is not exist'}
-#
-#     patch_body = {
-#         'metadata': {
-#             'annotations': {NS_ANNOTATION: None},
-#         }
-#     }
-#     api.patch_namespace(old,patch_body)
-#     return {'message': f'namespace: {new} is protected, old namespace: {old} is unprotected'}
-
-
 @kopf.on.validate(CRD_NAME, operations=['CREATE', 'UPDATE'])
 def validate_np_params(body, **_):
     """
@@ -208,8 +165,6 @@ def np_fn(spec, logger, **_):
     logger.info(_)
     return {'message': _}
 
-
-
 @kopf.on.update(CRD_NAME,field='spec.namespaces')
 def update_field_namespaces(new,old, logger, **_):
     """
@@ -231,3 +186,44 @@ def update_field_selectors(new,old, logger, **_):
             futures = {executor.submit(tools.sub_update_fn, ns.metadata.name, _ns, logger): ns.metadata.name for ns in namespaces_list}
             for future in concurrent.futures.as_completed(futures):
                 future.result()
+
+
+# @kopf.on.validate(CRD_NAME,operations=['CREATE','UPDATE'])
+# def validate_np_params(body, **_):
+#     if body.spec.get('namespaces') and body.spec.get('selectors'):
+#         raise kopf.PermanentError('Only one of spec.namespaces and spec.selectors can be configured')
+#     if not body.spec.get('namespace'):
+#         raise kopf.PermanentError('spec.namespace is required')
+#
+# @kopf.on.update(CRD_NAME)
+# @kopf.on.create(CRD_NAME)
+# @kopf.on.resume(CRD_NAME)
+# def ns_protect_fn(spec,logger, **_):
+#     ns = spec.get('namespace')
+#     ns_annotations = api.read_namespace(ns).metadata.annotations
+#     if  ns_annotations:
+#         if NS_ANNOTATION in ns_annotations:
+#             logger.info(f'namespace is protected: {ns}')
+#             return {'message': f'namespace: {ns} is protected'}
+#
+#     patch_body = {
+#         'metadata': {
+#             'annotations': {NS_ANNOTATION: 'true'},
+#         }
+#     }
+#     api.patch_namespace(ns,patch_body)
+#     return {'message': f'namespace: {ns} is protected'}
+#
+# @kopf.on.update(CRD_NAME,field='spec.namespace')
+# def update_ns_fn(new, old, **_):
+#     all_ns = (ns.metadata.name for ns in api.list_namespace().items)
+#     if old not in all_ns:
+#         return {'message': f'namespace: {old} is not exist'}
+#
+#     patch_body = {
+#         'metadata': {
+#             'annotations': {NS_ANNOTATION: None},
+#         }
+#     }
+#     api.patch_namespace(old,patch_body)
+#     return {'message': f'namespace: {new} is protected, old namespace: {old} is unprotected'}
