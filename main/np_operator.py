@@ -1,7 +1,9 @@
 import concurrent.futures
 import logging
+
 import kopf
 from kubernetes import client
+
 from main.config import Config
 
 CRD_NAME: str = 'namespaceprotects'
@@ -9,6 +11,7 @@ API_NAME: str = f'{CRD_NAME}.hj.com'
 NS_ANNOTATION: str = 'namespaceprotect.hj.com/protect'
 conf = Config()
 conf.connect_k8s()
+
 
 class Tools:
     @staticmethod
@@ -26,9 +29,8 @@ class Tools:
 
         return (ns.metadata.name for ns in all_ns)
 
-
     @classmethod
-    def sub_np_fn(cls,ns, logger):
+    def sub_np_fn(cls, ns, logger):
         """
         给指定命名空间打上保护注解，如果没有被保护的话
         """
@@ -47,7 +49,7 @@ class Tools:
         return {'message': _}
 
     @classmethod
-    def sub_update_fn(cls,ns, new, logger):
+    def sub_update_fn(cls, ns, new, logger):
         all_ns = cls.get_all_ns()
         if ns not in all_ns:
             return {'message': f'namespace: {ns} is not exist'}
@@ -67,20 +69,23 @@ class Tools:
 
 api = client.CoreV1Api()
 tools = Tools
+
+
 @kopf.on.startup()
 def init_fn(settings: kopf.OperatorSettings, **_):
-    #发送给k8s事件的日志级别设置为WARNING
+    # 发送给k8s事件的日志级别设置为WARNING
     settings.posting.level = logging.WARNING
-    #同步函数，工作线程池大小设置为10
+    # 同步函数，工作线程池大小设置为10
     settings.execution.max_workers = 10
     settings.execution.executor = concurrent.futures.ThreadPoolExecutor()
-    #设置finalizer名称
+    # 设置finalizer名称
     settings.persistence.finalizer = f'{API_NAME}/kopf-finalizer'
-    #重试回退
-    settings.networking.error_backoffs = [10,20,30]
-    #准入控制
-    settings.admission.server = kopf.WebhookServer(addr='0.0.0.0',port=8443,host=conf.listen_host)
+    # 重试回退
+    settings.networking.error_backoffs = [10, 20, 30]
+    # 准入控制
+    settings.admission.server = kopf.WebhookServer(addr='0.0.0.0', port=8443, host=conf.listen_host)
     settings.admission.managed = API_NAME
+
 
 @kopf.on.validate('namespaces', operations=['DELETE'])
 def validate_namespace(body, **_):
@@ -91,6 +96,7 @@ def validate_namespace(body, **_):
     ns_annotations = body.metadata.annotations
     if ns_annotations and NS_ANNOTATION in ns_annotations:
         raise kopf.AdmissionError(f'Namespace: {body.metadata.name} is protected and cannot be deleted.')
+
 
 @kopf.on.validate(CRD_NAME, operations=['CREATE', 'UPDATE'])
 def validate_np_params(body, **_):
@@ -155,7 +161,8 @@ def np_fn(spec, logger, **_):
             raise kopf.PermanentError(f"Failed to list namespaces with labels {selectors['labels']}: {e}")
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(tools.sub_np_fn, ns.metadata.name, logger): ns.metadata.name for ns in namespaces_list}
+            futures = {executor.submit(tools.sub_np_fn, ns.metadata.name, logger): ns.metadata.name for ns in
+                       namespaces_list}
             for future in concurrent.futures.as_completed(futures):
                 future.result()
 
@@ -163,28 +170,31 @@ def np_fn(spec, logger, **_):
     logger.info(_)
     return {'message': _}
 
-@kopf.on.update(CRD_NAME,field='spec.namespaces')
-def update_field_namespaces(new,old, logger, **_):
+
+@kopf.on.update(CRD_NAME, field='spec.namespaces')
+def update_field_namespaces(new, old, logger, **_):
     """
     更新 spec.namespaces 字段时，删除已存在的保护注解。
     """
     if old:
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(tools.sub_update_fn, ns,new, logger): ns for ns in old}
+            futures = {executor.submit(tools.sub_update_fn, ns, new, logger): ns for ns in old}
             for future in concurrent.futures.as_completed(futures):
                 future.result()
 
-@kopf.on.update(CRD_NAME,field='spec.selectors')
-def update_field_selectors(new,old, logger, **_):
+
+@kopf.on.update(CRD_NAME, field='spec.selectors')
+def update_field_selectors(new, old, logger, **_):
     if old:
         ns_label = ','.join(f'{key}={value}' for key, value in old.get('labels').items())
         namespaces_list = api.list_namespace(label_selector=ns_label).items
-        _ns = api.list_namespace(label_selector=','.join(f'{key}={value}' for key, value in new.get('labels').items())).items
+        _ns = api.list_namespace(
+            label_selector=','.join(f'{key}={value}' for key, value in new.get('labels').items())).items
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(tools.sub_update_fn, ns.metadata.name, _ns, logger): ns.metadata.name for ns in namespaces_list}
+            futures = {executor.submit(tools.sub_update_fn, ns.metadata.name, _ns, logger): ns.metadata.name for ns in
+                       namespaces_list}
             for future in concurrent.futures.as_completed(futures):
                 future.result()
-
 
 # @kopf.on.validate(CRD_NAME,operations=['CREATE','UPDATE'])
 # def validate_np_params(body, **_):
