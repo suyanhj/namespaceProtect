@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-operator
+  namespace: np-operator
+spec:
+  selector:
+    app: np-operator
+  ports:
+    - name: webhook
+      port: 443
+      targetPort: 8443
+    - name: healthz
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: np-operator
+  namespace: np-operator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: np-operator
+  template:
+    metadata:
+      labels:
+        app: np-operator
+    spec:
+      serviceAccountName: np-operator
+      containers:
+      - name: np-operator
+        image: nolar/kopf-operator
+        ports:
+        - containerPort: 8443  # Webhook 监听端口
+        - containerPort: 8080  # 健康探针端口
+        env:
+        - name: env
+          value: "k8s"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10

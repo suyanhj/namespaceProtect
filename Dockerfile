@@ -17,4 +17,4 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY . /app
-CMD kopf run --standalone --verbose --log-format=full --liveness http://0.0.0.0:80  /app/main/np-operator.py
+CMD kopf run --standalone --log-format=full --liveness http://0.0.0.0:8080  /app/main/np-operator.py

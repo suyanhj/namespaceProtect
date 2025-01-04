@@ -1,0 +1,14 @@
+apiVersion: hj.com/v1
+kind: NamespaceProtect
+metadata:
+  # name: "{name}"
+  name: test
+spec:
+  # namespace: "{namespace}"
+#  namespace: default
+  namespaces:
+  - 'default'
+  - 't1'
+#  selectors:
+#    labels:
+#      app: xx
