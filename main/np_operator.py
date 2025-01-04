@@ -2,11 +2,13 @@ import concurrent.futures
 import logging
 import kopf
 from kubernetes import client
-from config import Config
+from main.config import Config
 
 CRD_NAME: str = 'namespaceprotects'
 API_NAME: str = f'{CRD_NAME}.hj.com'
 NS_ANNOTATION: str = 'namespaceprotect.hj.com/protect'
+conf = Config()
+conf.connect_k8s()
 
 class Tools:
     @staticmethod
@@ -62,15 +64,11 @@ class Tools:
         logger.info(_)
         return {'message': _}
 
+
+api = client.CoreV1Api()
+tools = Tools
 @kopf.on.startup()
 def init_fn(settings: kopf.OperatorSettings, **_):
-    #kubernetes客户端初始化
-    global api
-    global tools
-    conf = Config()
-    conf.connect_k8s()
-    api = client.CoreV1Api()
-    tools = Tools
     #发送给k8s事件的日志级别设置为WARNING
     settings.posting.level = logging.WARNING
     #同步函数，工作线程池大小设置为10

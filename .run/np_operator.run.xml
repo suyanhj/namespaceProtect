@@ -2,7 +2,7 @@
   <configuration default="false" name="np_operator" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
     <module name="namespaceProtect" />
     <option name="ENV_FILES" value="" />
-    <option name="INTERPRETER_OPTIONS" value="-m kopf run --verbose" />
+    <option name="INTERPRETER_OPTIONS" value="-m kopf run --verbose --standalone --log-format=full --liveness http://0.0.0.0:8080" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />

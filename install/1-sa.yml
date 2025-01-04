@@ -28,24 +28,6 @@ rules:
     verbs: [create, patch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: np-operator
-rules:
-  - apiGroups: [ hj.com ]
-    resources: [ namespaceprotects ]
-    verbs: [ '*' ]
-  - apiGroups: [""]
-    resources: [events]
-    verbs: [create]
-  - apiGroups: [batch, extensions]
-    resources: [jobs]
-    verbs: [create]
-  - apiGroups: [""]
-    resources: [pods, persistentvolumeclaims]
-    verbs: [create]
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: np-operator
@@ -54,9 +36,27 @@ roleRef:
   kind: ClusterRole
   name: np-operator
 subjects:
-  - kind: ServiceAccount
-    name: np-operator
-    namespace: "{{NAMESPACE}}"
+- kind: ServiceAccount
+  name: np-operator
+  namespace: np-operator
+---
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: Role
+#metadata:
+#  name: np-operator
+#rules:
+#  - apiGroups: [ hj.com ]
+#    resources: [ namespaceprotects ]
+#    verbs: [ '*' ]
+#  - apiGroups: [""]
+#    resources: [events]
+#    verbs: [create]
+#  - apiGroups: [batch, extensions]
+#    resources: [jobs]
+#    verbs: [create]
+#  - apiGroups: [""]
+#    resources: [pods, persistentvolumeclaims]
+#    verbs: [create]
 ---
 #apiVersion: rbac.authorization.k8s.io/v1
 #kind: RoleBinding

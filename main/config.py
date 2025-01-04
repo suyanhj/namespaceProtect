@@ -1,15 +1,17 @@
 import logging
+from os import getenv
+
 
 class Config:
 
     def __init__(self):
-        self.listen_host = '192.168.10.81'
+        self.listen_host = 'np-operator.np-operator.svc' if getenv('env') == 'k8s' else '192.168.10.81'
         # self.listen_host = 'np-operator'
         self.api_server = 'https://192.168.10.110:6443'
-        # self.kbctx = '~/.kube/config'
-        self.kbctx = None
+        self.kbctx = '~/.kube/config'
         self.token = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IlZjcUFzenUwM3RZck4xdlE1cHoxcUliSllHVzVRVDZubENaZHJyRmJKSU0ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI2M2Y5ZjdkNS0yMmIwLTQ4MzAtOTc3YS1iZTQyNDkyODJiMTYiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06YWRtaW4tdXNlciJ9.Ug9p5GH1aa8rKpd2U3wZiyENfSzYu6aXoADwx7zJjycyNoU4F3D0ly31coEBvPQR1Ci8LHN98zFRjda2f77DG2bpYyg66Gz8khsXjosSfY1qdB6KL1yukFCqGeT6dkhG9uiFyNZsH0iPVtylqUFzJuHV0yOf_4SYcig2cC5aY0N2-cZ1lgIv6qvS5tMzWr9i_SyrPQWB1JHKmyoxmYoJV0dkzaANFoP6jWsmbJv5gnFzR0J0qR6gBsRXP76lqJCEamZQNkaBO4ePaqvdqxqtBRfdfPxSjilfffKuDxvdLN13TOzadSuThMKo694JNSNU3XfN8kmA0rvVKLtAZbPnOg'
-        self.token_file = '/run/secrets/kubernetes.io/serviceaccount/token'
+        self.token_file = None
+        # self.token_file = '/run/secrets/kubernetes.io/serviceaccount/token'
         self.msg = None
         self.logger = self.logger_setup()
 
