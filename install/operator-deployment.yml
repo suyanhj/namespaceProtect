@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: np-operator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: np-operator
+  template:
+    metadata:
+      labels:
+        app: np-operator
+    spec:
+      serviceAccountName: np
+      containers:
+      - name: the-only-one
+        image: nolar/kopf-operator
