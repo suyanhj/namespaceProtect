@@ -21,15 +21,18 @@ spec:
         type: object
         properties:
           spec:
-            # type: object
-            # properties:
-            #   namespace:
-            #     type: string
-            #   protected:
-            #     type: boolean
-            #     default: true
             type: object
-            x-kubernetes-preserve-unknown-fields: true
+            properties:
+              namespaces:
+                type: array
+                items:
+                  type: string
+              selectors:
+                type: object
+                properties:
+                  labels:
+                    type: object
+#            x-kubernetes-preserve-unknown-fields: true
           status:
             type: object
             x-kubernetes-preserve-unknown-fields: true

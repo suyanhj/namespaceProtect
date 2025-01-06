@@ -4,7 +4,7 @@ import logging
 import kopf
 from kubernetes import client
 
-from main.config import Config
+from config import Config
 
 CRD_NAME: str = 'namespaceprotects'
 API_NAME: str = f'{CRD_NAME}.hj.com'
