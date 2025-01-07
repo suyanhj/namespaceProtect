@@ -6,7 +6,7 @@ FROM python:3.10-slim
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=UTF-8 \
-    default_pkgs="net-tools curl procps"
+    default_pkgs="net-tools curl procps libssl-dev"
 
 RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources && \
     apt update && \
@@ -15,6 +15,5 @@ RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debi
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
-
 COPY . /app
-CMD kopf run --standalone --log-format=full --liveness http://0.0.0.0:8080  main/np_operator.py
+CMD kopf run --standalone -A --log-format=full --liveness http://0.0.0.0:8080  main/np_operator.py

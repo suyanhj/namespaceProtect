@@ -36,6 +36,7 @@ spec:
       containers:
       - name: np-operator
         image: registry.cn-hangzhou.aliyuncs.com/suyanhj/namespace-protect:0.1.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8443  # Webhook 监听端口
         - containerPort: 8080  # 健康探针端口

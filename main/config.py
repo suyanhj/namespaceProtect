@@ -1,11 +1,16 @@
 import logging
 from os import getenv
-
+from pathlib import Path
 
 class Config:
+    CRD_NAME: str = 'namespaceprotects'
+    API_NAME: str = f'{CRD_NAME}.hj.com'
+    NS_ANNOTATION: str = 'namespaceprotect.hj.com/protect'
+    PROJ_DIR = Path(__file__).parent.parent
 
-    def __init__(self):
-        if getenv('env') == 'k8s':
+    def __init__(self,env=None):
+        self.env = getenv('env') if getenv('env') else env
+        if self.env == 'k8s':
             self.listen_host = 'np-operator.np-operator.svc'
             self.api_server = 'https://kubernetes.default.svc'
             self.token = None
@@ -54,10 +59,12 @@ class Config:
         from kubernetes import config, client
         try:
             config.load_kube_config(self.kbctx)
+            return client
         except Exception:
             self.logger.warning('使用kubeconfig连接k8s集群失败，将尝试下一项配置连接')
             try:
                 config.load_incluster_config()
+                return client
             except Exception:
                 self.logger.warning('使用pod内token file连接k8s集群失败，将尝试token配置连接')
                 k8s_conf = client.Configuration(
@@ -66,6 +73,7 @@ class Config:
                 )
                 k8s_conf.verify_ssl = False
                 client.Configuration.set_default(k8s_conf)
+                return client
 
     def logger_setup(self):
         logging.basicConfig(
