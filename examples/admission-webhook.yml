@@ -8,11 +8,18 @@ webhooks:
   - v1beta1
   clientConfig:
     caBundle: $ca
-    service:
-      name: $svc
-      namespace: $ns
-      path: /validate-namespace
-      port: 8443
+    url: https://192.168.10.81:8443/validate-ns
+#    service:
+#      name: $svc
+#      namespace: $ns
+#      path: /namespace
+#      port: 8443
+  namespaceSelector:
+    matchExpressions:
+    - key: 'kubernetes.io/metadata.name'
+      operator: NotIn
+      values:
+      - kube-system
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validate-namespace.namespaceprotects.hj.com
@@ -26,18 +33,25 @@ webhooks:
     resources:
     - namespaces
     scope: '*'
-  sideEffects: None
+  sideEffects: None #NoneOnDryRun
   timeoutSeconds: 30
 - admissionReviewVersions:
   - v1
   - v1beta1
   clientConfig:
     caBundle: $ca
-    service:
-      name: $svc_name
-      namespace: $ns_name
-      path: /validate-namespace
-      port: 8443
+    url: https://192.168.10.81:8443/validate-np-params
+#    service:
+#      name: $svc_name
+#      namespace: $ns_name
+#      path: /namespaceprotect
+#      port: 443
+  namespaceSelector:
+    matchExpressions:
+      - key: 'kubernetes.io/metadata.name'
+        operator: NotIn
+        values:
+          - kube-system
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validate-np-params.namespaceprotects.hj.com
@@ -52,5 +66,5 @@ webhooks:
     resources:
     - namespaceprotects
     scope: '*'
-  sideEffects: None
+  sideEffects: None #NoneOnDryRun
   timeoutSeconds: 30

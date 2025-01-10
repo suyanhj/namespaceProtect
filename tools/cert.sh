@@ -1,18 +1,31 @@
 #!/usr/bin/env bash
 
 set -e
-svc=${svc:-np-operator}
-ns=${ns:-$svc}
+svc=${svc:-np-webhook}
+ns=${ns:-np-operator}
 ip=${ip:-127.0.0.1}
 work_dir=files
+conf_dir=conf
+crt_dir=crt
+days=3650
+ca_subj='/O=ca-hj/CN=ca.hj.com'
 
-
-
-gen_key(){
-  openssl genrsa -out crt/private.key 2048
+gen_ca(){
+  if [ -f $crt_dir/ca.key -a -f $crt_dir/ca.crt ] ;then
+    echo -e "已有ca证书"
+  else
+    openssl genrsa -out $crt_dir/ca.key 2048
+    openssl req -new -x509 -key $crt_dir/ca.key -out $crt_dir/ca.crt -nodes -days $days -subj $ca_subj
+  fi
 }
-
-conf_csr(){
+gen_key(){
+  if [ -f $crt_dir/server.key ] ;then
+    echo -e "已有私钥"
+  else
+    openssl genrsa -out $crt_dir/server.key 2048
+  fi
+}
+san_conf(){
   svc_name=${1:-$svc}
   ns_name=${2:-$ns}
   ip_addr=${3:-$ip}
@@ -20,7 +33,7 @@ conf_csr(){
   if [ -z $svc_name ] || [ -z $ns_name ]; then
     return 1
   fi
-  tee > conf/csr.conf <<eof
+  tee > $conf_dir/san.conf <<eof
 [req]
 req_extensions = v3_req
 distinguished_name = req_distinguished_name
@@ -40,7 +53,12 @@ eof
 gen_csr(){
   svc_name=${1:-$svc}
   ns_name=${2:-$ns}
-  openssl req -new -key crt/private.key -subj "/CN=$svc_name.$ns_name.svc" -out conf/svc.csr -config conf/csr.conf
+
+  openssl req -new -key $crt_dir/server.key -subj "/CN=$svc_name.$ns_name.svc" -out $crt_dir/svc.csr -config $conf_dir/san.conf
+}
+issue_crt(){
+  openssl x509 -req -days $days -in $crt_dir/svc.csr -CA $crt_dir/ca.crt -CAkey $crt_dir/ca.key -CAcreateserial -out $crt_dir/server.crt -extensions v3_req -extfile $conf_dir/san.conf
+  cat $crt_dir/server.crt $crt_dir/ca.crt > $crt_dir/server.pem
 }
 gen_yml(){
   tee > csr.yml <<EOF
@@ -49,21 +67,25 @@ kind: CertificateSigningRequest
 metadata:
   name: np-operator
 spec:
-  signerName: "kubernetes.io/kube-apiserver-client"
+  signerName: "kubernetes.io/kubelet-serving"
   groups:
   - system:authenticated
-  request: $(cat svc.csr | base64 | tr -d '\n')
+  request: $(cat $crt_dir/svc.csr | base64 | tr -d '\n')
   usages:
   - digital signature
   - key encipherment
-  - client auth
+  - server auth
 EOF
 }
+
 main(){
-  [ -z $work_dir ] && mkdir -p $work_dir/{crt,conf} && cd $work_dir
-  [ -f crt/private.key ] || gen_key
-  conf_csr $@
-  gen_csr $@
-  gen_yml
+  [ -d $work_dir/conf ] || mkdir -p $work_dir/{crt,conf}
+  cd $work_dir
+  gen_ca
+  gen_key
+  san_conf $@
+  [ -f $crt_dir/server.key -a -f $crt_dir/svc.csr ] || gen_csr $@
+  issue_crt
+  #gen_yml
 }
 main $@

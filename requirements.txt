@@ -2,3 +2,5 @@ kopf~=1.37.4
 kubernetes~=31.0.0
 certbuilder==0.14.2
 https://mirror.ghproxy.com/https://github.com/wbond/oscrypto/archive/d5f3437ed24257895ae1edd9e503cfb352e635a8.zip
+uvicorn==0.34.0
+fastapi==0.115.6
