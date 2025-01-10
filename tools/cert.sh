@@ -84,7 +84,7 @@ main(){
   gen_ca
   gen_key
   san_conf $@
-  [ -f $crt_dir/server.key -a -f $crt_dir/svc.csr ] || gen_csr $@
+  gen_csr $@
   issue_crt
   #gen_yml
 }
