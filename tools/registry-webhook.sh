@@ -38,7 +38,7 @@ conf_cm(){
   --from-file=ca.crt=files/crt/ca.crt \
   --from-file=server.key=files/crt/server.key \
   --from-file=server.pem=files/crt/server.pem \
-  -n $ns_name --dry-run=client -o yaml | kubectl apply -f -
+  -n $ns_name --dry-run=client -o yaml |grep -v creationTimestamp |kubectl apply -f -
 
 }
 main(){
