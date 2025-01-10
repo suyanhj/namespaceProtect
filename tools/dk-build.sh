@@ -72,8 +72,8 @@ conf_img(){
 
 }
 main(){
-#  build_img $*
-#  print_img $*
+  build_img $*
+  print_img $*
   conf_img $*
 }
 main $@
