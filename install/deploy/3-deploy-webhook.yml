@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-webhook
+  namespace: np-operator
+spec:
+  selector:
+    app: np-webhook
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: 443
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: np-webhook
+  namespace: np-operator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: np-webhook
+  template:
+    metadata:
+      labels:
+        app: np-webhook
+    spec:
+      serviceAccountName: np-operator
+      containers:
+      - name: np-webhook
+        image: registry.cn-hangzhou.aliyuncs.com/suyanhj/namespace-protect-webhook:0.1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        env:
+        - name: env
+          value: "k8s"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        livenessProbe:
+          httpGet:
+            path: /livz
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /livz
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: webhook-crt-volume
+          mountPath: /app/tools/files/crt
+          readOnly: true
+      volumes:
+      - name: webhook-crt-volume
+        configMap:
+          name: webhook-crt
