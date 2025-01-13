@@ -5,7 +5,7 @@ metadata:
 spec:
   namespaces:
   - 'default'
-  - 't1'
+#  - 't1'
 #  selectors:
 #    labels:
 #      app: xx

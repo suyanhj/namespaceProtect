@@ -1,4 +1,3 @@
-from multiprocessing import Process
 from fastapi import FastAPI
 import uvicorn
 
@@ -63,7 +62,7 @@ async def validate_np_params(admission_review: AdmissionRequest):
 
     # 校验每个命名空间是否存在
     if namespaces:
-        existing_ns = client.get_all_ns()
+        existing_ns = Tools.get_all_ns()
         for ns in namespaces:
             if ns not in existing_ns:
                 return await admission_error(admission_review, f"Namespace: {ns} does not exist")
@@ -121,7 +120,7 @@ def ssl_load(crt=None, key=None, ca=None):
     cert_file = crt if crt else crt_dir + 'server.pem'
     key_file = key if key else crt_dir + 'server.key'
 
-    return (ca_crt, cert_file, key_file)
+    return ca_crt, cert_file, key_file
 
 
 # 启动 HTTPS 服务

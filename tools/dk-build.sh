@@ -38,6 +38,7 @@ build_img(){
       return 0
     fi
     img=`chk_img $1`
+    name=${img%:*}
     docker build -t $img --build-arg run_app=$name . > /dev/null
 #    docker build -t $img --progress plain --build-arg run_app=$name . > /dev/null
     docker push $img > /dev/null
@@ -60,7 +61,7 @@ edit_file(){
   fi
 }
 conf_img(){
-  cd ../install/deploy
+  cd install/deploy
   for i in $*; do
     img=`chk_img $i`
     if [[ $i =~ operator ]] ;then

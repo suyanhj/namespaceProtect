@@ -30,12 +30,12 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         livenessProbe:
-          httpGet:
+          tcpSocket:
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
-          httpGet:
+          tcpSocket:
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
