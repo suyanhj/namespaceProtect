@@ -1,4 +1,4 @@
-#kubectl apply -f - <<e
+kubectl apply -f - <<e
 apiVersion: hj.com/v1
 kind: NamespaceProtect
 metadata:
@@ -10,4 +10,4 @@ spec:
 #  selectors:
 #    labels:
 #      app: xx
-#e
+e
