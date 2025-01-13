@@ -38,7 +38,7 @@ build_img(){
       return 0
     fi
     img=`chk_img $1`
-    name=${img%:*}
+    name=${1%:*}
     docker build -t $img --build-arg run_app=$name . > /dev/null
 #    docker build -t $img --progress plain --build-arg run_app=$name . > /dev/null
     docker push $img > /dev/null
