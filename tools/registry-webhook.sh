@@ -37,6 +37,8 @@ conf_webhook(){
     else
       envsubst < $tmp_file |sed -r -e '/service:/,/port:/d' -e 's@^#(.*url.*)@\1@' > $install_file
     fi
+  else
+    envsubst < $tmp_file > $install_file
   fi
   kubectl apply -f $install_file
 }

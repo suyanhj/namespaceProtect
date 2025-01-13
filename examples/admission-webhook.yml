@@ -42,8 +42,8 @@ webhooks:
     caBundle: $ca
 #    url: https://$ip:8443/validate-np-params
     service:
-      name: $svc_name
-      namespace: $ns_name
+      name: $svc
+      namespace: $ns
       path: /validate-np-params
       port: 443
   namespaceSelector:
