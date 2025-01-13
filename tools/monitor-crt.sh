@@ -4,7 +4,7 @@
 dir=/app/tools/files/crt
 crt=$dir/server.pem
 key=$dir/server.key
-ca=$dir/crt/ca.crt
+ca=$dir/ca.crt
 
 # 重载 nginx 的函数
 reload_nginx() {
