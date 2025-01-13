@@ -2,7 +2,7 @@
 
 set -ea
 
-type=${1:svc} #注册方式: svc | url
+type=${1:-svc} #注册方式: svc | url
 _svc=${2:-$svc}
 _ns=${3:-$ns}
 _ip=${4:-$ip}
