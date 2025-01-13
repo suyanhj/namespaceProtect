@@ -12,9 +12,11 @@ install:
 	@echo "Running installation scripts..."
 	kubectl apply -f $(OPERATOR_DIR)/crd.yml
 	cd $(TOOLS_DIR) && sh cert.sh
-	kubectl apply -f $(DEPLOY_DIR)/1-ns.yml
+	kubectl apply -f install
 	cd $(TOOLS_DIR) && sh registry-webhook.sh
-	kubectl apply -f $(DEPLOY_DIR)
+	kubectl apply -f $(DEPLOY_DIR)/1-deploy-webhook.yml
+	kubectl wait -n np-operator --for=condition=ready pod -l app=np-webhook --timeout=300s
+	kubectl apply -f $(DEPLOY_DIR)/2-deploy-operator.yml
 	@echo "Installation completed."
 
 # Uninstall: Delete the Kubernetes resources
@@ -23,6 +25,7 @@ uninstall:
 	kubectl delete -f $(OPERATOR_DIR)/admission-webhook.yml
 	kubectl delete -f $(DEPLOY_DIR)
 	kubectl delete -f $(OPERATOR_DIR)/crd.yml
+	kubectl delete -f install/role.yml
 	@echo "Uninstallation completed."
 
 # Clean: Remove files generated during installation

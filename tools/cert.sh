@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
 
 set -e
-svc=${svc:-np-webhook}
-ns=${ns:-np-operator}
-ip=${ip:-127.0.0.1}
+_svc=${1:-$svc}
+_ns=${2:-$ns}
+_ip=${3:-$ip}
+svc=${_svc:-np-webhook}
+ns=${_ns:-np-operator}
+ip=${_ip:-127.0.0.1}
 work_dir=files
 conf_dir=conf
 crt_dir=crt
 days=3650
 ca_subj='/O=ca-hj/CN=ca.hj.com'
+
+if [ -z $svc ] || [ -z $ns ]; then
+  exit 1
+fi
 
 gen_ca(){
   if [ -f $crt_dir/ca.key -a -f $crt_dir/ca.crt ] ;then
@@ -26,13 +33,6 @@ gen_key(){
   fi
 }
 san_conf(){
-  svc_name=${1:-$svc}
-  ns_name=${2:-$ns}
-  ip_addr=${3:-$ip}
-
-  if [ -z $svc_name ] || [ -z $ns_name ]; then
-    return 1
-  fi
   tee > $conf_dir/san.conf <<eof
 [req]
 req_extensions = v3_req
@@ -44,17 +44,14 @@ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 [alt_names]
-DNS.1 = $svc_name
-DNS.2 = $svc_name.$ns_name
-DNS.3 = $svc_name.$ns_name.svc
-IP.1 = $ip_addr
+DNS.1 = $svc
+DNS.2 = $svc.$ns
+DNS.3 = $svc.$ns.svc
+IP.1 = $ip
 eof
 }
 gen_csr(){
-  svc_name=${1:-$svc}
-  ns_name=${2:-$ns}
-
-  openssl req -new -key $crt_dir/server.key -subj "/CN=$svc_name.$ns_name.svc" -out $crt_dir/svc.csr -config $conf_dir/san.conf
+  openssl req -new -key $crt_dir/server.key -subj "/CN=$svc.$ns.svc" -out $crt_dir/svc.csr -config $conf_dir/san.conf
 }
 issue_crt(){
   openssl x509 -req -days $days -in $crt_dir/svc.csr -CA $crt_dir/ca.crt -CAkey $crt_dir/ca.key -CAcreateserial -out $crt_dir/server.crt -extensions v3_req -extfile $conf_dir/san.conf

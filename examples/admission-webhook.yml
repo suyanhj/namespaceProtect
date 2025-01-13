@@ -8,12 +8,12 @@ webhooks:
   - v1beta1
   clientConfig:
     caBundle: $ca
-#    url: https://192.168.10.81:8443/validate-ns
+#    url: https://$ip:8443/validate-ns
     service:
       name: $svc
       namespace: $ns
       path: /validate-ns
-      port: 8443
+      port: 443
   namespaceSelector:
     matchExpressions:
     - key: 'kubernetes.io/metadata.name'
@@ -40,10 +40,10 @@ webhooks:
   - v1beta1
   clientConfig:
     caBundle: $ca
-#    url: https://192.168.10.81:8443/validate-np-params
+#    url: https://$ip:8443/validate-np-params
     service:
-      name: $svc_name
-      namespace: $ns_name
+      name: $svc
+      namespace: $ns
       path: /validate-np-params
       port: 443
   namespaceSelector:

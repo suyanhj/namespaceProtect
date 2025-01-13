@@ -1,24 +1,18 @@
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: np-operator
-  namespace: np-operator
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: np-operator
 rules:
-  - apiGroups: [hj.com,v1]
-    resources: [namespaceprotects,namespaces]
+  - apiGroups: [hj.com]
+    resources: [namespaceprotects]
     verbs: ['*']
   - apiGroups: [apiextensions.k8s.io]
     resources: [customresourcedefinitions]
     verbs: [list, watch]
   - apiGroups: [""]
     resources: [namespaces]
-    verbs: [list, watch]
+    verbs: [list, watch,update,patch]
   - apiGroups: [admissionregistration.k8s.io, admissionregistration.k8s.io]
     resources: [validatingwebhookconfigurations, mutatingwebhookconfigurations]
     verbs: [create, patch,update,list,watch]
@@ -35,6 +29,9 @@ subjects:
 - kind: ServiceAccount
   name: np-operator
   namespace: np-operator
+- kind: ServiceAccount
+  name: np-operator
+  namespace: np-webhook
 ---
 #apiVersion: rbac.authorization.k8s.io/v1
 #kind: Role

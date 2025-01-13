@@ -3,7 +3,7 @@ FROM python:3.10-slim
 WORKDIR /app
 RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources && \
     apt update && \
-    apt install --no-install-recommends -y net-tools curl procps libssl-dev nginx && \
+    apt install --no-install-recommends -y net-tools curl procps libssl-dev nginx inotify-tools && \
     apt clean all
 
 COPY requirements.txt /tmp/requirements.txt

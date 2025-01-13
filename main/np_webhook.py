@@ -8,6 +8,7 @@ conf = Config()
 client = Tools.connect_k8s()
 api = client.CoreV1Api()
 log = conf.logger
+log_conf = f'{conf.PROJ_DIR}/examples/log_conf.yml'
 app = FastAPI()
 
 
@@ -19,13 +20,14 @@ async def livz():
     return {"status": "ok"}
 
 
+
 @app.post("/validate-ns")
 async def validate_namespace(admission_review: AdmissionRequest):
     """
     验证命名空间是否被保护
     """
-    request_object = admission_review.request.object
-    namespace_name = request_object['metadata']['name']
+    request_object = admission_review.request.oldObject
+    namespace_name = admission_review.request.name
     annotations = request_object.get('metadata', {}).get('annotations', {})
 
     # 校验是否有保护注解
@@ -123,37 +125,24 @@ def ssl_load(crt=None, key=None, ca=None):
     return ca_crt, cert_file, key_file
 
 
-# 启动 HTTPS 服务
-def start_https():
-    ca_crt, cert_file, key_file = ssl_load()
-    log_conf = f'{conf.PROJ_DIR}/examples/log_conf.yml'
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8443,
-        ssl_certfile=cert_file,
-        ssl_keyfile=key_file,
-        ssl_ca_certs=ca_crt,
-        log_config=log_conf
-    )
-
-
-# 启动 HTTP 服务
-def start_http():
-    log_conf = f'{conf.PROJ_DIR}/examples/log_conf.yml'
-    uvicorn.run(app, host="0.0.0.0", port=8080,log_config=log_conf)
+def start(ssl=False):
+    if ssl:
+        ca_crt, cert_file, key_file = ssl_load()
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=8443,
+            ssl_certfile=cert_file,
+            ssl_keyfile=key_file,
+            ssl_ca_certs=ca_crt,
+            log_config=log_conf
+        )
+    else:
+        uvicorn.run(app, host="0.0.0.0", port=8080,log_config=log_conf)
 
 
 if __name__ == '__main__':
-    # 使用多进程启动 HTTP 和 HTTPS 服务
-
-    # https_process = Process(target=start_https)
-    # http_process = Process(target=start_http)
-    #
-    # https_process.start()
-    # http_process.start()
-    #
-    # https_process.join()
-    # http_process.join()
-    start_http()
-    # start_https()
+    if conf.env == 'k8s':
+        start()
+    else:
+        start(True)
