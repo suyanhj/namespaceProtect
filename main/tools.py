@@ -60,7 +60,7 @@ class Tools:
                 'annotations': {cls.conf.NS_ANNOTATION: 'true'}
             }
         }
-        cls.api.patch_namespace(ns, patch_body)
+        cls.connect_k8s().CoreV1Api().patch_namespace(ns, patch_body)
         _ = f'Protected namespace {ns}.'
         logger.info(_)
         return {'message': _}
@@ -78,7 +78,7 @@ class Tools:
                 'annotations': {cls.conf.NS_ANNOTATION: None},
             }
         }
-        cls.api.patch_namespace(ns, patch_body)
+        cls.connect_k8s().CoreV1Api().patch_namespace(ns, patch_body)
         _ = f'old namespace: {ns} is unprotected'
         logger.info(_)
         return {'message': _}

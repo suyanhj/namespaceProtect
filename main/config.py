@@ -1,15 +1,17 @@
 import logging
 from os import getenv
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
 from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
+from typing_extensions import Literal, TypedDict
+
 
 class Config:
     CRD_NAME: str = 'namespaceprotects'
     API_NAME: str = f'{CRD_NAME}.hj.com'
     NS_ANNOTATION: str = 'namespaceprotect.hj.com/protect'
     PROJ_DIR = Path(__file__).parent.parent
-
 
     def __init__(self, env=None):
         self.logger = self.logger_setup()
@@ -60,8 +62,6 @@ class Config:
             with open(self.token_file, 'r') as f:
                 return f.read()
 
-
-
     @staticmethod
     def logger_setup():
         logging.basicConfig(
@@ -74,9 +74,30 @@ class Config:
         return logging.getLogger(__name__)
 
 
+Operation = Literal['CREATE', 'UPDATE', 'DELETE', 'CONNECT']
+
+
+class CreateOptions(TypedDict, total=False):
+    apiVersion: Literal["meta.k8s.io/v1"]
+    kind: Literal["CreateOptions"]
+
+
+class UpdateOptions(TypedDict, total=False):
+    apiVersion: Literal["meta.k8s.io/v1"]
+    kind: Literal["UpdateOptions"]
+
+
+class DeleteOptions(TypedDict, total=False):
+    apiVersion: Literal["meta.k8s.io/v1"]
+    kind: Literal["DeleteOptions"]
+
+
 # 请求模型
 class AdmissionReviewRequest(BaseModel):
     uid: str
+    options: Union[None, CreateOptions, UpdateOptions, DeleteOptions]
+    object: Optional[Dict[str, Any]] = None
+    oldObject: Optional[Dict[str, Any]] = None
     kind: Optional[Dict[str, str]] = None
     resource: Optional[Dict[str, str]] = None
     subResource: Optional[str] = None
@@ -85,11 +106,9 @@ class AdmissionReviewRequest(BaseModel):
     requestSubResource: Optional[str] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
-    operation: str
+    operation: Optional[str] = None
     userInfo: Optional[Dict[str, Any]] = None
-    object: Optional[Dict[str, Any]] = None
-    oldObject: Optional[Dict[str, Any]] = None
-    options: Optional[Dict[str, str]] = None
+    # options: Optional[Dict[str, str]] = None
     dryRun: Optional[bool] = False
 
 
