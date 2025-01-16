@@ -54,15 +54,15 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         livenessProbe:
-          httpGet:
-            path: /livz
-            port: 80
+          tcpSocket:
+#            path: /livz
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
-          httpGet:
-            path: /livz
-            port: 80
+          tcpSocket:
+#            path: /livz
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
         volumeMounts:

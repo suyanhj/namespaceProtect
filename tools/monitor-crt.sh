@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # 配置文件路径
-dir=/app/tools/files/crt
-crt=$dir/server.pem
-key=$dir/server.key
-ca=$dir/ca.crt
+dir=/app/tools/files/crt/..data
+#crt=$dir/server.pem
+#key=$dir/server.key
+#ca=$dir/ca.crt
 
 # 重载 nginx 的函数
 reload_nginx() {
@@ -15,7 +15,7 @@ reload_nginx() {
 # 监控文件变化
 monitor_files() {
     # 使用 inotifywait 监控文件更新（包括修改、移动、创建等）
-    inotifywait -m -e modify "$crt" "$key" $ca |
+    inotifywait -m -e modify $dir |
     while read -r filename event; do
         echo "Detected change in: $filename"
         reload_nginx
