@@ -4,16 +4,19 @@
 TOOLS_DIR=tools
 DEPLOY_DIR=install/deploy
 OPERATOR_DIR=install/operator
-
+registry ?= svc
+ip ?= 192.168.10.81
+namespace ?= np-operator
 .PHONY: install uninstall clean
 
 # Install: Run the necessary scripts to install the application
 install:
 	@echo "Running installation scripts..."
 	kubectl apply -f $(OPERATOR_DIR)/crd.yml
-	cd $(TOOLS_DIR) && sh cert.sh
+
+	cd $(TOOLS_DIR) && ip=$(ip) ns=$(namespace) sh cert.sh
 	kubectl apply -f install
-	cd $(TOOLS_DIR) && sh registry-webhook.sh
+	cd $(TOOLS_DIR) && ip=$(ip) ns=$(namespace) sh registry-webhook.sh $(registry)
 	kubectl apply -f $(DEPLOY_DIR)/1-deploy-webhook.yml
 	kubectl wait -n np-operator --for=condition=ready pod -l app=np-webhook --timeout=300s
 	kubectl apply -f $(DEPLOY_DIR)/2-deploy-operator.yml

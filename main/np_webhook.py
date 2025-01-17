@@ -1,14 +1,13 @@
 from fastapi import FastAPI
 import uvicorn
-
-from config import Config, AdmissionRequest, AdmissionResponse, AdmissionReviewResponse
+from config import AdmissionRequest, AdmissionResponse, AdmissionReviewResponse
 from tools import Tools
 
-conf = Config()
+conf = Tools.conf
 client = Tools.connect_k8s()
 api = client.CoreV1Api()
 log = conf.logger
-log_conf = f'{conf.PROJ_DIR}/examples/log_conf.yml'
+log_conf = f'{conf.PROJ_DIR}/conf/log_conf.yml'
 app = FastAPI()
 
 
@@ -19,24 +18,6 @@ async def livz():
     """
     return {"status": "ok"}
 
-
-
-@app.post("/validate-ns")
-async def validate_namespace(admission_review: AdmissionRequest):
-    """
-    验证命名空间是否被保护
-    """
-    request_object = admission_review.request.oldObject
-    namespace_name = admission_review.request.name
-    annotations = request_object.get('metadata', {}).get('annotations', {})
-
-    # 校验是否有保护注解
-    if annotations and conf.NS_ANNOTATION in annotations:
-        return await admission_error(admission_review,
-                                     f"Namespace: {namespace_name} is protected and cannot be deleted.", 403)
-
-    # 如果没有保护注解，允许操作
-    return await admission_accept(admission_review)
 
 
 @app.post("/validate-np-params")
@@ -79,7 +60,25 @@ async def validate_np_params(admission_review: AdmissionRequest):
     return await admission_accept(admission_review)
 
 
-# 构造错误响应
+@app.post("/validate-resources-protect")
+async def validate_resources_protect(admission_review: AdmissionRequest):
+    """
+    验证命名空间是否被保护
+    """
+    request_object = admission_review.request.oldObject
+    name = admission_review.request.name
+    resource = admission_review.request.resource.get('resource')
+    annotations = request_object.get('metadata', {}).get('annotations', {})
+
+    # 校验是否有保护注解
+    if annotations and conf.NS_ANNOTATION in annotations:
+        return await admission_error(admission_review,
+                                     f"resource {resource}: {name} is protected and cannot be deleted.", 403)
+
+    # 如果没有保护注解，允许操作
+    return await admission_accept(admission_review)
+
+
 async def admission_error(admission_review, message, code=400):
     """
     构造错误响应
@@ -96,7 +95,7 @@ async def admission_error(admission_review, message, code=400):
     return response
 
 
-# 构造接受响应
+
 async def admission_accept(admission_review):
     """
     接受请求
@@ -112,7 +111,7 @@ async def admission_accept(admission_review):
     return response
 
 
-# 加载 SSL 证书并返回配置
+
 def ssl_load(crt=None, key=None, ca=None):
     """
     加载 SSL 证书

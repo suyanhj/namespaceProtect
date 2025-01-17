@@ -8,38 +8,6 @@ webhooks:
   - v1beta1
   clientConfig:
     caBundle: $ca
-#    url: https://$ip:8443/validate-ns
-    service:
-      name: $svc
-      namespace: $ns
-      path: /validate-ns
-      port: 443
-  namespaceSelector:
-    matchExpressions:
-    - key: 'kubernetes.io/metadata.name'
-      operator: NotIn
-      values:
-      - kube-system
-  failurePolicy: Fail
-  matchPolicy: Equivalent
-  name: validate-namespace.namespaceprotects.hj.com
-  rules:
-  - apiGroups:
-    - ""
-    apiVersions:
-    - v1
-    operations:
-    - DELETE
-    resources:
-    - namespaces
-    scope: '*'
-  sideEffects: None #NoneOnDryRun
-  timeoutSeconds: 30
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    caBundle: $ca
 #    url: https://$ip:8443/validate-np-params
     service:
       name: $svc
@@ -65,6 +33,44 @@ webhooks:
     - UPDATE
     resources:
     - namespaceprotects
+    scope: '*'
+  sideEffects: None #NoneOnDryRun
+  timeoutSeconds: 30
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    caBundle: $ca
+#    url: https://$ip:8443/validate-resources-protect
+    service:
+      name: $svc
+      namespace: $ns
+      path: /validate-resources-protect
+      port: 443
+  namespaceSelector:
+    matchExpressions:
+    - key: 'kubernetes.io/metadata.name'
+      operator: NotIn
+      values:
+      - kube-system
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: validate-namespace.namespaceprotects.hj.com
+  rules:
+  - apiGroups:
+    - ""
+    - "apps"
+    apiVersions:
+    - v1
+    operations:
+    - DELETE
+    resources:
+    - namespaces
+    - configmaps
+    - secrets
+    - services
+    - deployments
+    - statefulsets
     scope: '*'
   sideEffects: None #NoneOnDryRun
   timeoutSeconds: 30

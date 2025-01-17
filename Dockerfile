@@ -11,11 +11,12 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 COPY . /app
 
 RUN chmod +x tools/run.sh && \
-    cp examples/nginx.conf /etc/nginx
+    cp conf/nginx.conf /etc/nginx
 
 #支持：operator、webhook
 ARG run_app=operator
 ENV PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=UTF-8 \
+    TZ=Asia/Shanghai \
     app=${run_app}
 CMD tools/run.sh

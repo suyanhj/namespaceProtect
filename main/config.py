@@ -13,6 +13,7 @@ class Config:
     NS_ANNOTATION: str = 'namespaceprotect.hj.com/protect'
     PROJ_DIR = Path(__file__).parent.parent
 
+
     def __init__(self, env=None):
         self.logger = self.logger_setup()
         self.env = getenv('env') if getenv('env') else env
@@ -42,7 +43,7 @@ class Config:
     def vaild_api_srv(self):
         if not self.api_server:
             self.msg = 'api server 未定义'
-            self.logger.warning(self.msg)
+            self.logger.debug(self.msg)
             # print(self.msg)
             return
 
@@ -53,7 +54,7 @@ class Config:
 
         self.msg = f'未配置 {msg}, 将获取下一配置项'
         # print(self.msg)
-        self.logger.warning(self.msg)
+        self.logger.debug(self.msg)
 
     def get_token(self):
         if self.token:

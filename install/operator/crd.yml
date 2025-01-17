@@ -32,6 +32,11 @@ spec:
                 properties:
                   labels:
                     type: object
+                    additionalProperties:
+                      type: string
+              protectSubresources:
+                type: boolean
+                default: false
 #            x-kubernetes-preserve-unknown-fields: true
           status:
             type: object

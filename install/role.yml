@@ -10,8 +10,8 @@ rules:
   - apiGroups: [apiextensions.k8s.io]
     resources: [customresourcedefinitions]
     verbs: [list, watch]
-  - apiGroups: [""]
-    resources: [namespaces]
+  - apiGroups: ["",apps]
+    resources: [namespaces,configmaps,secrets,services,deployments,statefulsets]
     verbs: [list, watch,update,patch]
   - apiGroups: [admissionregistration.k8s.io, admissionregistration.k8s.io]
     resources: [validatingwebhookconfigurations, mutatingwebhookconfigurations]
@@ -30,8 +30,8 @@ subjects:
   name: np-operator
   namespace: np-operator
 - kind: ServiceAccount
-  name: np-operator
-  namespace: np-webhook
+  name: np-webhook
+  namespace: np-operator
 ---
 #apiVersion: rbac.authorization.k8s.io/v1
 #kind: Role

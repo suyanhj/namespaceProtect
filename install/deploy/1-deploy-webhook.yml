@@ -41,7 +41,7 @@ spec:
       serviceAccountName: np-webhook
       containers:
       - name: np-webhook
-        image: registry.cn-hangzhou.aliyuncs.com/suyanhj/namespace-protect-webhook:0.1.0
+        image: registry.cn-hangzhou.aliyuncs.com/suyanhj/namespace-protect-webhook:0.2.1
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -54,15 +54,15 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         livenessProbe:
-          httpGet:
-            path: /livz
-            port: 80
+          tcpSocket:
+#            path: /livz
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
-          httpGet:
-            path: /livz
-            port: 80
+          tcpSocket:
+#            path: /livz
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
         volumeMounts:
