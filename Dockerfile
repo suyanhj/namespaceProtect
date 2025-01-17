@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 COPY . /app
 
 RUN chmod +x tools/run.sh && \
-    cp examples/nginx.conf /etc/nginx
+    cp conf/nginx.conf /etc/nginx
 
 #支持：operator、webhook
 ARG run_app=operator

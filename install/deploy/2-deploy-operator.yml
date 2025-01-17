@@ -24,7 +24,7 @@ spec:
       serviceAccountName: np-operator
       containers:
       - name: np-operator
-        image: registry.cn-hangzhou.aliyuncs.com/suyanhj/namespace-protect-operator:0.1.0
+        image: registry.cn-hangzhou.aliyuncs.com/suyanhj/namespace-protect-operator:0.2.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

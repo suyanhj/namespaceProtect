@@ -7,7 +7,7 @@ conf = Tools.conf
 client = Tools.connect_k8s()
 api = client.CoreV1Api()
 log = conf.logger
-log_conf = f'{conf.PROJ_DIR}/examples/log_conf.yml'
+log_conf = f'{conf.PROJ_DIR}/conf/log_conf.yml'
 app = FastAPI()
 
 

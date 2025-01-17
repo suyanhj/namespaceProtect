@@ -5,10 +5,10 @@ metadata:
   name: test
 spec:
   namespaces:
-#  - 'default'
+  - 'default'
   - 't1'
 #  selectors:
 #    labels:
 #      app: xx
-  protectSubresources: true
+  protectSubresources: false
 #e

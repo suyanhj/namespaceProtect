@@ -27,7 +27,7 @@ get_crt(){
 conf_webhook(){
   ca=`base64 files/crt/ca.crt`
   os=`uname -s`
-  tmp_file=../examples/admission-webhook.yml
+  tmp_file=../conf/admission-webhook.yml
   install_file=../install/operator/admission-webhook.yml
   set +a
 
