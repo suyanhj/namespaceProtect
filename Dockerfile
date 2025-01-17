@@ -17,5 +17,6 @@ RUN chmod +x tools/run.sh && \
 ARG run_app=operator
 ENV PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=UTF-8 \
+    TZ=Asia/Shanghai \
     app=${run_app}
 CMD tools/run.sh
