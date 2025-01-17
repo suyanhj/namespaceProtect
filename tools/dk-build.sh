@@ -6,7 +6,7 @@
 set -e
 
 img_hub=registry.cn-hangzhou.aliyuncs.com/suyanhj/namespace-protect
-default_tag=0.1.0
+default_tag=0.2.1
 
 arg_check(){
   if [ `echo $*|wc -w` = 0 ]; then
